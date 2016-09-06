@@ -1,0 +1,333 @@
+# this is an example of the Carona Parceira API
+# as a demonstration of an API spec in YAML
+swagger: '2.0'
+info:
+  title: Carona Parceira API
+  description: Move your app forward with the Carona Parceira API
+  version: "1.0.0"
+# the domain of the service
+host: api.caronaparceira.com
+# array of all schemes that your API supports
+schemes:
+  - https
+# will be prefixed to all paths
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /riders:
+    get:
+      summary: Riders List
+      description: |
+        The user enter his origin and destination point so the system can display the list of riders available to share a ride with.
+      parameters:
+        - name: latitude_origin
+          in: query
+          description: Latitude component of origin location.
+          required: true
+          type: number
+          format: double
+        - name: longitude_origin
+          in: query
+          description: Longitude component of origin location.
+          required: true
+          type: number
+          format: double
+        - name: latitude_destination
+          in: query
+          description: Longitude component of destination location.
+          required: true
+          type: number
+          format: double
+        - name: longitude_destination
+          in: query
+          description: Longitude component of destination location.
+          required: true
+          type: number
+          format: double
+        
+      tags:
+        - RidersList
+      responses:
+        200:
+          description: An array of riders
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Rider'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /user/type:
+    get:
+      summary: User type
+      description: |
+        The description of a user, if he owns a car and if so, in which category he fits
+      parameters:
+        - name: has_car
+          in: query
+          description: check if the user owns a car or not.
+          required: true
+          type: string
+          format: boolean
+        - name: car_category
+          in: query
+          description: if the user owns a car, which category he fits.
+          required: true
+          type: string
+          format: string
+      tags:
+        - User Type
+      responses:
+        200:
+          description: An array of users by user type
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/UserType'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /estimates/time:
+    get:
+      summary: Time Estimates
+      description: The Time Estimates to get to the final destination with the selected rider.
+      parameters:
+        - name: start_latitude
+          in: query
+          description: Latitude component of start location.
+          required: true
+          type: number
+          format: double
+        - name: start_longitude
+          in: query
+          description: Longitude component of start location.
+          required: true
+          type: number
+          format: double
+        - name: end_latitude
+          in: query
+          description: Latitude component of end location.
+          required: true
+          type: number
+          format: double
+        - name: end_longitude
+          in: query
+          description: Longitude component of end location.
+          required: true
+          type: number
+          format: double
+        - name: time_id
+          in: query
+          type: number
+          description: Unique identifier representing a specific estimate time for a given latitude & longitude.
+      tags:
+        - Estimates
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Rider'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /estimates/cost:
+    get:
+      summary: Cost Estimates
+      description: The Cost Estimates to get to the final destination with the selected rider.
+      parameters:
+        - name: start_latitude
+          in: query
+          description: Latitude component of start location.
+          required: true
+          type: number
+          format: double
+        - name: start_longitude
+          in: query
+          description: Longitude component of start location.
+          required: true
+          type: number
+          format: double
+        - name: end_latitude
+          in: query
+          description: Latitude component of end location.
+          required: true
+          type: number
+          format: double
+        - name: end_longitude
+          in: query
+          description: Longitude component of end location.
+          required: true
+          type: number
+          format: double
+        - name: category
+          in: query
+          description: car category.
+          required: true
+          type: string
+          format: string
+        - name: cost_id
+          in: query
+          type: string
+          description: Unique identifier representing a specific estimate cost for a given latitude & longitude and user category.
+      tags:
+        - Estimates
+      responses:
+        200:
+          description: An array of products
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/CostEstimate'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /me:
+    get:
+      summary: User Profile
+      description: The User Profile endpoint returns information about the Carona Parceira user.
+      tags:
+        - User
+      responses:
+        200:
+          description: Profile information for a user
+          schema:
+            $ref: '#/definitions/Profile'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+  /history:
+    get:
+      summary: User Activity
+      description: The User Activity endpoint returns data about a user's lifetime activity with Carona Parceira. The response will include origin locations, final locations and times, the riders that the user has shared a ride with, and the rating of the user. The history array in the response will have a maximum length based on the limit parameter. The response value count may exceed limit, therefore subsequent API requests may be necessary.
+      parameters:
+        - name: offset
+          in: query
+          type: integer
+          format: int32
+          description: Offset the list of returned results by this amount. Default is zero.
+        - name: limit
+          in: query
+          type: integer
+          format: int32
+          description: Number of items to retrieve. Default is 5, maximum is 100.
+      tags:
+        - User
+      responses:
+        200:
+          description: History information for the given user
+          schema:
+            $ref: '#/definitions/Activities'
+        default:
+          description: Unexpected error
+          schema:
+            $ref: '#/definitions/Error'
+definitions:
+  Rider:
+    type: object
+    properties:
+      rider_id:
+        type: string
+        description: Unique identifier representing a specific Rider.
+      description:
+        type: string
+        description: Description of the Rider.
+      display_name:
+        type: string
+        description: Display name of Rider.
+      capacity:
+        type: string
+        description: Capacity of Rider's car. For example, 4 people.
+      image:
+        type: string
+        description: Image URL representing the Rider.
+  CostEstimate:
+    type: object
+    properties:
+      cost_id:
+        type: string
+        description: Unique identifier representing a specific ride cost (the fuel amount that the user will have to pay)
+      estimate:
+        type: string
+        description: Formatted string of estimate cost of the ride. The estimate may vary depending on how many people are sharing the ride.
+  UserType:
+    type: object
+    properties:
+      cost_id:
+        type: string
+        description: Unique identifier representing a specific ride cost (the fuel amount that the user will have to pay)
+      estimate:
+        type: string
+        description: Formatted string of estimate cost of the ride. The estimate may vary depending on how many people are sharing the ride.
+  Profile:
+    type: object
+    properties:
+      first_name:
+        type: string
+        description: First name of the Carona Parceira user.
+      last_name:
+        type: string
+        description: Last name of the Carona Parceira user.
+      age:
+        type: string
+        description: Age of the Carona Parceira user.
+      rating:
+        type: string
+        description: Rating of the Carona Parceira user.
+      car_category:
+        type: string
+        description: Car category of the Carona Parceira user.
+      user_category:
+        type: string
+        description: User category of the Carona Parceira user.
+      email:
+        type: string
+        description: Email address of the Carona Parceira user
+      picture:
+        type: string
+        description: Image URL of the Carona Parceira user.
+      own_car:
+        type: boolean
+        description: Boolean to check if the user has a car.
+  Activity:
+    type: object
+    properties:
+      uuid:
+        type: string
+        description: Unique identifier for the activity
+  Activities:
+    type: object
+    properties:
+      offset:
+        type: integer
+        format: int32
+        description: Position in pagination.
+      limit:
+        type: integer
+        format: int32
+        description: Number of items to retrieve (100 max).
+      count:
+        type: integer
+        format: int32
+        description: Total number of items available.
+      history:
+        type: array
+        items:
+          $ref: '#/definitions/Activity'
+  Error:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      fields:
+        type: string
